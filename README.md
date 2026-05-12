@@ -1,7 +1,7 @@
 # RNA-seq-and-ChIP-seq-Analysis-of-AR-and-HOXB13-Regulation
 
 ## Overview
-This project analyzes RNA-seq and ChIP-seq data to investigate whether the transcription factor HOXB13 upstream of androgen receptor (AR) signaling in prostate cancer cells. Using public data sets from GEO, I compare expression and enhancer activity changes following AR and HOXB13 knockdown. All datasets were obtained from NCBI GEO. Raw or processed data were not redistributed in this repository due to size constraints; instead, direct download links are provided.
+This project analyzes RNA-seq and ChIP-seq data to investigate whether the transcription factor HOXB13 acts upstream of androgen receptor (AR) signaling in prostate cancer cells. Using public data sets from GEO, I compare expression and enhancer activity changes following AR and HOXB13 knockdown. All datasets were obtained from NCBI GEO. Raw or processed data were not redistributed in this repository due to size constraints, direct download links are provided instead.
 
 ## Relation to Prior Work
 
@@ -29,6 +29,12 @@ If HOXB13 is a master regulator upstream of AR, then:
 * Visualized using deepTools
 
 ## Results
+* Differential expression analysis revealed limited overlap between genes downregulated in AR knockdown and HOXB13 knockdown conditions
+* A substantial number of genes were uniquely affected by HOXB13 knockdown, suggesting that HOXB13 has regulatory roels independent of AR signaling.
+* ChIP-seq analysis of H3K27ac signal showed that AR-bound enhancers did not consistently lose activity following HOXB13 knockdown.
+* In contrast, AR knockdown produced the expected decrease in enhancer activity.
+
+### Overall, these results do not support the model that HOXB13 functions solely upstream of AR. Instead, they suggest that HOXB13 may regulate gene expression through both AR-dependent and AR-independent mechanisms.
 
 ## Data Sources
 
@@ -43,3 +49,9 @@ If HOXB13 is a master regulator upstream of AR, then:
 * ATAC-seq (open chromatin regions, LNCaP control)
   * GEO accession:[GSM7893414](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM7893414)
   * File used: GSM7893414_LNCaP_Vehicle-CFS-0_Rep3_TR_peaks.narrowPeak.gz
+
+
+Install required packages before running:
+* install.packages("here")
+* BiocManager::install("DESeq2")
+* install.packages("gplots")

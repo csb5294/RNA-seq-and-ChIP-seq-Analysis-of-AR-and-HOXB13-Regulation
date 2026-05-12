@@ -1,0 +1,7 @@
+Total rows in AR knockdown table: 542 
+Total rows in HOXB13 knockdown table: 373 
+Total rows in merged table: 17900 
+AR-only downregulated: 1342 
+HOXB13-only downregulated: 280 
+Downregulated in both: 142 
+Downregulated genes based on padj: 3554

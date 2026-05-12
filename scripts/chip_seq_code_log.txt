@@ -1,0 +1,84 @@
+## Request interactive node and load all the modules, cd into project
+directory
+srun -A biosc1542-2026s -t 60 --pty bash
+module load bedtools
+module load deeptools
+cd final_project_chip_seq
+##Determine number of AR bound regions
+wc -l /ix1/biosc1542-2026s/project/ar_peaks.narrowPeak
+##Unzip downloaded file
+gunzip GSM7893414_LNCaP_Vehicle-CFS-0_Rep3_TR_peaks.narrowPeak.gz
+##Determine number of ATAC-seq open regions
+wc -l GSM7893414_LNCaP_Vehicle-CFS-0_Rep3_TR_peaks.narrowPeak
+##Create promoter region file as 2000 bp up and downstream of TSS
+bedtools flank -s -l 2000 -r 0 -i /ix1/biosc1542-
+2026s/data/hg38.gencode.bed12 -g /ix1/biosc1542-
+2026s/data/hg38_chr_sizes_full.txt | bedtools slop -s -l 0 -r 2000 -i - -g
+/ix1/biosc1542-2026s/data/hg38_chr_sizes_full.txt > promoters.bed12
+##Search for ENST00000494149.2 entry in promoter file
+grep "ENST00000494149.2" promoters.bed12
+##Get AR peaks that overlap with open ATAC-seq regions, are marked by
+H3K27ac, and do not overlap with HOXB13 peaks
+bedtools intersect -u -a /ix1/biosc1542-2026s/project/ar_peaks.narrowPeak
+-b GSM7893414_LNCaP_Vehicle-CFS-0_Rep3_TR_peaks.narrowPeak | bedtools
+intersect -u -a - -b /ix1/biosc1542-2026s/project/k27ac_peaks.broadPeak |
+bedtools intersect -v -a - -b /ix1/biosc1542-
+2026s/project/hox_peaks.narrowPeak > ar_active_peaks.bed
+##Separate AR peaks into promoter and enhancer regions
+bedtools intersect -u -a ar_active_peaks.bed -b promoters.bed12 >
+ar_atac_peaks_promoter.bed
+bedtools intersect -v -a ar_active_peaks.bed -b promoters.bed12 >
+ar_atac_peaks_enhancer.bed
+##Get HOX peaks that overlap with open ATAC-seq regions, are marked by
+H3K27ac, and do not overlap with AR peaks
+bedtools intersect -u -a /ix1/biosc1542-2026s/project/hox_peaks.narrowPeak
+-b GSM7893414_LNCaP_Vehicle-CFS-0_Rep3_TR_peaks.narrowPeak | bedtools
+intersect -u -a - -b /ix1/biosc1542-2026s/project/k27ac_peaks.broadPeak |
+bedtools intersect -v -a - -b /ix1/biosc1542-
+2026s/project/ar_peaks.narrowPeak > hox_active_peaks.bed
+##Separate AR peaks into promoter and enhancer regions
+bedtools intersect -u -a hox_active_peaks.bed -b promoters.bed12 >
+hox_atac_promoter.bed
+bedtools intersect -v -a hox_active_peaks.bed -b promoters.bed12 >
+hox_atac_enhancer.bed
+##Get ATAC-seq open regions that are marked by H3K27ac, not in promoter
+regions, and not overlapped by either AR peaks or HOXB13 peaks
+bedtools intersect -u -a GSM7893414_LNCaP_Vehicle-CFS0_Rep3_TR_peaks.narrowPeak -b /ix1/biosc1542-
+2026s/project/k27ac_peaks.broadPeak | bedtools intersect -v -a - -b
+promoters.bed12 | bedtools intersect -v -a - -b /ix1/biosc1542-
+2026s/project/ar_peaks.narrowPeak | bedtools intersect -v -a - -b
+/ix1/biosc1542-2026s/project/hox_peaks.narrowPeak >
+control_enhancer_set.bed
+##Get the first 2000 entries as a subset
+head -n 2000 control_enhancer_set.bed > control_enhancer_subset.bed
+##Copy bigwig files to project directory
+cp /ix1/biosc1542-2026s/project/ctrl_k27ac.bw .
+cp /ix1/biosc1542-2026s/project/ar_k27ac.bw .
+cp /ix1/biosc1542-2026s/project/hox_k27ac.bw .
+##Compute matrix
+computeMatrix reference-point --referencePoint center \
+- b 2000 -a 2000
+--sortRegions descend \
+--missingDataAsZero \
+--binSize 50 \
+- o k27.matrix \
+- S ar_k27ac.bw hox_k27ac.bw ctrl_k27ac.bw \
+- R ar_atac_peaks_enhancer.bed hox_atac_enhancer.bed
+control_enhancer_subset.bed
+##Create heatmap
+plotHeatmap -m k27.matrix -o k27_heatmap.png \
+--zMax 1 \
+--heatmapHeight 20 \
+--colorMap Blues \
+--whatToShow "heatmap and colorbar" \
+--xAxisLabel "Peak dist (bp)" \
+--samplesLabel "AR KD" "HOXB13 KD" Ctrl \
+--regionsLabel "AR enh" "HOXB13 enh" "Ctrl enh" \
+--plotTitle "Colin Byrne"
+##Create profile plot
+plotProfile -m k27.matrix -o k27_profile.png \
+--plotWidth 8 \
+--yAxisLabel "Avg H3K27ac CPM" \
+--samplesLabel "AR KD" "HOXB13 KD" Ctrl \
+--regionsLabel "AR enh" "HOXB13 enh" "Ctrl enh" \
+--plotTitle "Colin Byrne"
