@@ -1,0 +1,19 @@
+name: genomics_pipeline
+
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+
+dependencies:
+  - bedtools
+  - samtools
+  - deeptools
+  - python=3.10
+  - numpy
+  - matplotlib
+  - r-base
+  - r-here
+  - r-gplots
+  - r-data.table
+  - bioconductor-deseq2

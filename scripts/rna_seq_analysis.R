@@ -1,4 +1,8 @@
-cat("Starting RNA-seq analysis...\n")
+## Include libraries
+
+library(here)
+library(DESeq2)
+library(gplots)
 
 ##Read in the csv
 
