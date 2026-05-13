@@ -1,5 +1,15 @@
+# R
+
 .Rproj.user
+.Rproj
 .Rhistory
 .RData
 .Ruserdata
 .positai
+
+# Raw data
+
+*.fastq
+*.fastq.gz
+*.bam
+*.sam
